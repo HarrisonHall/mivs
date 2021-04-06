@@ -43,44 +43,36 @@ Every mivs repo has a `.mivs` folder. Inside you'll find a structure like:
 ## Example
 ```
 $ mkdir auto_readme_test
-mkdir: cannot create directory ‘auto_readme_test’: File exists
 $ cd auto_readme_test
 $ mivs -i
-Initializing mivs
+readme_test.sh: line 8: mivs: command not found
 $ echo 'Hello world!'
 $ mivs -r 'Created README'
-Recording current state
+readme_test.sh: line 11: mivs: command not found
 $ mkdir src
-mkdir: cannot create directory ‘src’: File exists
 $ echo 'print('\''wow!'\'')'
 $ echo 'sq = lambda x : x**2'
 $ mivs -r 'Added other code'
-Recording current state
+readme_test.sh: line 16: mivs: command not found
 $ echo -e 'I added another sentence.\nOr two!'
 $ mivs -r 'Updated README'
-Recording current state
+readme_test.sh: line 19: mivs: command not found
 $ mivs -l
-Initializing mivs
-main
-(0) 2021-04-06 00:12:34.006285: Created README
-(1) 2021-04-06 00:12:34.060347: Added other code
-(2) 2021-04-06 00:12:34.113876: Updated README
-(3) 2021-04-06 00:15:02.379771: Created README
-(4) 2021-04-06 00:15:02.433315: Added other code
-(5) 2021-04-06 00:15:02.485747: Updated README
+readme_test.sh: line 21: mivs: command not found
 $ mivs -s README
-Searching mivs
+readme_test.sh: line 23: mivs: command not found
 $ ls
 README.md  src
 $ mivs -j 0
-Jumping to record 0
+readme_test.sh: line 26: mivs: command not found
 $ ls
+README.md  src
 $ mivs -j 1
-Jumping to record 1
+readme_test.sh: line 29: mivs: command not found
 $ ls
-README.md
+README.md  src
 $ mivs -j 2
-Jumping to record 2
+readme_test.sh: line 32: mivs: command not found
 $ ls
 README.md  src
 $ cd ..
