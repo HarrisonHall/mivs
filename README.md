@@ -37,10 +37,19 @@ Every mivs repo has a `.mivs` folder. Inside you'll find a structure like:
   * A yaml file defining the following information
     * `name` of the mivs repo
 	* a list of `ignores`
-	* The last `record_number`
-	* A list of records messages
+	* The `last_record` number
+	* A list of `records` messages
 
 ## Requirements
 * `Python3`
 * Python `pyyaml` module
 * GNU/BSD `diff` and `patch`
+
+## FAQ
+> Why?
+mivs is a personal project over the course of a few days. 
+I don't necessarily think anyone should use this implementation of mivs. 
+But it was fun to make nonetheless. 
+> Wouldn't mivs me *more* minimal <this way> or <that way>
+Probably. I think mivs is cool because it does the least amount of work to 
+actually even consider itself versioning software.
