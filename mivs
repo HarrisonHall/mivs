@@ -12,6 +12,7 @@ import glob
 import shutil
 import sys
 import os
+import pathlib
 
 from yaml import load as yload
 from yaml import Loader as yLoader
@@ -26,8 +27,6 @@ PATCHED_DIR = "."
 MIVS_DIR = ".mivs"
 MIVS_CONF = "mivs.yaml"
 
-# TODO finish keeping records
-# TODO merge with other mivs project
 
 mivs_information = {
     "name": "main",
@@ -37,22 +36,31 @@ mivs_information = {
     "ignores": [],
 }
 
-### Versioning
+### Versioning (wrappers for diff and patch)
 def create_diff(olddir : str, newdir : str, patch_file=DIFF_FILE, ignores=[]) -> bool:
+    """
+    Create mivs diff between directories.
+    """
     excludes = "-x " + " ".join(ignores) if ignores else ""
     os.system(f"diff {excludes} -r -u --new-file {olddir} {newdir} > {patch_file}")
     return True
 
 def apply_patches(patches : list) -> bool:
+    """
+    Apply patches in-order to file.
+    """
     for patch in patches:
         os.system(f"patch -p1 -u -s < {patch}")
     return True
 
 ### Mivs
 def init() -> bool:
+    """
+    Initialize .mivs directory.
+    """
     if os.path.isdir(MIVS_DIR):
         return True
-    
+
     # Make mivs
     os.mkdir(".mivs")
 
@@ -64,15 +72,15 @@ def init() -> bool:
     os.mkdir(f".mivs/records/0")
     copy_files("", ".mivs/records/0/", [".mivs"])
     copy_to_latest()
-    
+
     return True
 
-def read_mivs_yaml() -> bool:
+def read_mivs_yaml(directory="") -> bool:
     """
     Read and process the mivs yaml file.
     """
     global mivs_information
-    conf_file = os.path.join(MIVS_DIR, MIVS_CONF)
+    conf_file = os.path.join(directory, MIVS_DIR, MIVS_CONF)
     if os.path.isfile(conf_file):
         with open(conf_file, "r") as stream:
             inf = yload(stream, Loader=yLoader)
@@ -80,21 +88,32 @@ def read_mivs_yaml() -> bool:
             return True
     return False
 
-def copy_to_latest():
+def copy_to_latest() -> None:
+    """
+    Copy current state of mivs repo to latest record.
+    """
     latest_dir = os.path.join(MIVS_DIR, "records/latest")
     if os.path.isdir(latest_dir):
         shutil.rmtree(latest_dir)
     os.mkdir(latest_dir)
     copy_files("", latest_dir, [".mivs"])
+    return None
 
-def copy_to_tmp():
+def copy_to_tmp() -> None:
+    """
+    Copy to the tmp record.
+    """
     tmp_dir = os.path.join(MIVS_DIR, "records/tmp")
     if os.path.isdir(tmp_dir):
         shutil.rmtree(tmp_dir)
     os.mkdir(tmp_dir)
     copy_files("", tmp_dir, [".mivs"])
+    return None
 
-def copy_from_tmp():
+def copy_from_tmp() -> None:
+    """
+    Copy back from tmp.
+    """
     # Clean up old stuff
     for path in os.listdir():
         if path in [".mivs"]:
@@ -108,8 +127,12 @@ def copy_from_tmp():
     copy_files(tmp_dir, "", [".mivs"])
     if os.path.isdir(tmp_dir):
         shutil.rmtree(tmp_dir)
+    return None
 
-def copy_zero():
+def copy_zero() -> None:
+    """
+    Copy mivs repo into 0th record.
+    """
     zero_dir = os.path.join(MIVS_DIR, "records/0")
     for path in os.listdir():
         if path in [".mivs"]:
@@ -119,8 +142,28 @@ def copy_zero():
         if os.path.isdir(path):
             shutil.rmtree(path)
     copy_files(zero_dir, ".", [])
+    return None
 
-def record(message, ignores=[]) -> bool:
+def copy_files(from_dir : str, to_dir : str, exceptions : list = []) -> bool:
+    """
+    Copy files recursively from one directory to another.
+    """
+    search_dir = from_dir if from_dir != "" else "."
+    for path in os.listdir(search_dir):
+        if path in exceptions or path in [".", ".."]:
+            continue
+        full_path = os.path.join(search_dir, path)
+        final_path = os.path.join(to_dir, path)
+        if os.path.isfile(full_path):
+            shutil.copyfile(full_path, final_path, follow_symlinks=False)
+        elif os.path.isdir(full_path):
+            os.mkdir(final_path)
+            copy_files(full_path, final_path, exceptions)
+        # TODO handle simlinks
+    return True
+
+### mivs commands
+def record(message : str, ignores=[], directory="") -> bool:
     """
     Record state of repo as a record.
     """
@@ -128,12 +171,15 @@ def record(message, ignores=[]) -> bool:
     mivs_information["records"].append(f"{datetime.now()}: {message}")
     mivs_information["last_record"] += 1
     mivs_information["current_record"] = mivs_information["last_record"]
-    to_file = os.path.join(".mivs/records", str(mivs_information["last_record"]))
+    to_file = os.path.join(directory, ".mivs/records", str(mivs_information["last_record"]))
     ignores += [".mivs"] + mivs_information["ignores"]
     create_diff(".mivs/records/latest", ".", patch_file=to_file, ignores=ignores)
     return True
 
-def search(message) -> bool:
+def search(message : str) -> bool:
+    """
+    Search mivs records for a message.
+    """
     global mivs_information
     potential_records = set()
     if message.isdigit():
@@ -147,6 +193,9 @@ def search(message) -> bool:
     return (len(potential_records) > 0)
 
 def jump(record_str : str) -> bool:
+    """
+    Jump between mivs records.
+    """
     global mivs_information
     # Get record number
     record_number = 0
@@ -173,6 +222,9 @@ def jump(record_str : str) -> bool:
     return True
 
 def merge(repo_path1 : str, repo_path2 : str, newpath : str) -> bool:
+    """
+    Merge two mivs repos into a third, favoring the first.
+    """
     global mivs_information
     if not os.path.exists(repo_path1) or not os.path.exists(repo_path2):
         print("Repo does not exist!")
@@ -181,15 +233,16 @@ def merge(repo_path1 : str, repo_path2 : str, newpath : str) -> bool:
         print("Directory exists for new repo!")
         return False
     shutil.copytree(repo_path1, newpath)
-    for p_obj in Path(repo_path1).rglob("*"):
+    read_mivs_yaml(directory=newpath)
+    for p_obj in pathlib.Path(repo_path1).rglob("*"):
         path = str(p_obj.relative_to(repo_path1))
-        if path.endswith(".mivs"):
-            continue
-        if not os.path.isfile(path):
+        if path.startswith(".mivs"):
             continue
         r1_filepath = os.path.join(repo_path1, path)
         r2_filepath = os.path.join(repo_path2, path)
         r3_filepath = os.path.join(newpath, path)
+        if not os.path.isfile(r1_filepath) or not os.path.isfile(r2_filepath):
+            continue
         if os.path.exists(r1_filepath) and os.path.exists(r2_filepath):
             os.system(
                 f"diff -D {mivs_information['name']} {r1_filepath} {r2_filepath} > {r3_filepath}"
@@ -198,43 +251,26 @@ def merge(repo_path1 : str, repo_path2 : str, newpath : str) -> bool:
             shutil.copy(r2_filepath, r3_filepath)
     merge1 = os.path.split(repo_path1)[-1]
     merge2 = os.path.split(repo_path2)[-1]
-    record(f"Merged {merge1} with {merge2}")
+    record(f"Merged {merge1} with {merge2}", directory=newpath)
+    with open(os.path.join(newpath, ".mivs/mivs.yaml"), "w") as mivs_file:
+        dump(mivs_information, mivs_file)
     return True
 
-def copy_files(from_dir : str, to_dir : str, exceptions : list = []) -> bool:
+def list_records() -> bool:
     """
-    Copy files recursively from one directory to another.
+    List all records of the mivs repo.
     """
-    search_dir = from_dir if from_dir != "" else "."
-    for path in os.listdir(search_dir):
-        if path in exceptions or path in [".", ".."]:
-            continue
-        full_path = os.path.join(search_dir, path)
-        final_path = os.path.join(to_dir, path)
-        if os.path.isfile(full_path):
-            shutil.copyfile(full_path, final_path, follow_symlinks=False)
-        elif os.path.isdir(full_path):
-            os.mkdir(final_path)
-            copy_files(full_path, final_path, exceptions)
-        # TODO handle simlinks
+    global mivs_information
+    print(f"{mivs_information['name']}")
+    for record_number, record_info in enumerate(mivs_information["records"]):
+        print(f"({record_number}) {record_info}")
     return True
-
-def find_mivs_dir(limit=10, current_path=".") -> str:
-    """
-    Returns path to the mivs directory searching up.
-    If path does not exists, False is returned.
-    """
-    if limit == 0:
-        return False
-    if MIVS_DIR in os.listdir():
-        if os.path.isdir(MIVS_DIR):
-            return current_path
-    os.chdir("..")
-    mivs_dir = find_mivs_dir(limit=limit-1, current_path=os.path.join(current_path, ".."))
-    return mivs_dir
 
 # CLI
-def parse_args():
+def parse_args() -> None:
+    """
+    Parse arguments from the command line
+    """
     parser = argparse.ArgumentParser(
         description="MInimal Versioning Software"
     )
@@ -251,6 +287,10 @@ def parse_args():
         help="Jump to a record"
     )
     parser.add_argument(
+        "-l", "--list", "--list-records", action="store_true",
+        help="List all records"
+    )
+    parser.add_argument(
         "-m", "--merge", type=str, nargs=3,
         help="Combine two mivs repos (favoring the first)"
     )
@@ -260,6 +300,21 @@ def parse_args():
     )
     args = parser.parse_args()
     return args
+
+def find_mivs_dir(limit=10, current_path=".") -> str:
+    """
+    Returns path to the mivs directory searching up.
+    If path does not exists, False is returned.
+    """
+    if limit == 0:
+        return False
+    if MIVS_DIR in os.listdir():
+        if os.path.isdir(MIVS_DIR):
+            return current_path
+    os.chdir("..")
+    mivs_dir = find_mivs_dir(limit=limit-1, current_path=os.path.join(current_path, ".."))
+    return mivs_dir
+
 
 if __name__ == "__main__":
     # Move to mivs dir
@@ -273,12 +328,12 @@ if __name__ == "__main__":
     mivs = parse_args()
 
     # Verify integrity of mivs directory
-    if (mivs.record or mivs.search or mivs.jump) and not found_mivs_dir:
+    if (mivs.record or mivs.search or mivs.jump) and (not found_mivs_dir and not mivs.merge):
         print("Not a mivs repo")
         exit(1)
     read_mivs_yaml()
 
-    if mivs.init or (not mivs.record and not mivs.search and not mivs.jump):
+    if mivs.init or (not mivs.record and not mivs.search and not mivs.jump and not mivs.merge):
         print("Initializing mivs")
         os.chdir(current_dir)
         init()
@@ -292,9 +347,14 @@ if __name__ == "__main__":
         search(mivs.search.lower())
     if mivs.jump or mivs.jump == 0:
         jump(mivs.jump)
+    if mivs.merge:
+        os.chdir(current_dir)
+        merge(*mivs.merge)
+        exit(0)
+    if mivs.list:
+        list_records()
 
     # Save mivs.yaml
-    print("Writing mivs.yaml")
     with open(".mivs/mivs.yaml", "w") as mivs_file:
         dump(mivs_information, mivs_file)
 

@@ -1,10 +1,14 @@
 #!/bin/bash
 
+# Simple test to use mivs functions which can be evaluated manually
+
 # Create directory
 echo "Setup"
 rm -rf autotest
 mkdir autotest
 cd autotest
+mkdir 1
+cd 1
 
 echo "Creating file1.txt"
 echo -e "something1\nsomething2\nsomething3" > file1.txt
@@ -58,4 +62,19 @@ mivs -j 0
 mivs -j current
 cat digdog/dog.txt
 
+cd ..
+
+# Test merging
+echo -e "\n===\n"
+echo "Testing merging"
+cd 1
+echo -e "Who\nLet\nthe\ndogs\nout" > file1.txt
+mivs -r "who let the dogs out"
+cd ..
+cp -r 1 2
+echo -e "Who\nLet\nthe\ncats\nout" > 2/file1.txt
+echo "About to merge"
+mivs -m 1 2 3
+
+# Cleanup
 cd ..
