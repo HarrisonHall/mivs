@@ -40,6 +40,52 @@ Every mivs repo has a `.mivs` folder. Inside you'll find a structure like:
 	* The `last_record` number
 	* A list of `records` messages
 
+## Example
+```
+$ mkdir auto_readme_test
+mkdir: cannot create directory ‘auto_readme_test’: File exists
+$ cd auto_readme_test
+$ mivs -i
+Initializing mivs
+$ echo 'Hello world!'
+$ mivs -r 'Created README'
+Recording current state
+$ mkdir src
+mkdir: cannot create directory ‘src’: File exists
+$ echo 'print('\''wow!'\'')'
+$ echo 'sq = lambda x : x**2'
+$ mivs -r 'Added other code'
+Recording current state
+$ echo -e 'I added another sentence.\nOr two!'
+$ mivs -r 'Updated README'
+Recording current state
+$ mivs -l
+Initializing mivs
+main
+(0) 2021-04-06 00:12:34.006285: Created README
+(1) 2021-04-06 00:12:34.060347: Added other code
+(2) 2021-04-06 00:12:34.113876: Updated README
+(3) 2021-04-06 00:15:02.379771: Created README
+(4) 2021-04-06 00:15:02.433315: Added other code
+(5) 2021-04-06 00:15:02.485747: Updated README
+$ mivs -s README
+Searching mivs
+$ ls
+README.md  src
+$ mivs -j 0
+Jumping to record 0
+$ ls
+$ mivs -j 1
+Jumping to record 1
+$ ls
+README.md
+$ mivs -j 2
+Jumping to record 2
+$ ls
+README.md  src
+$ cd ..
+```
+
 ## Requirements
 * `Python3`
 * Python `pyyaml` module
@@ -47,9 +93,16 @@ Every mivs repo has a `.mivs` folder. Inside you'll find a structure like:
 
 ## FAQ
 > Why?
+
 mivs is a personal project over the course of a few days. 
 I don't necessarily think anyone should use this implementation of mivs. 
 But it was fun to make nonetheless. 
-> Wouldn't mivs me *more* minimal <this way> or <that way>
+
+> Wouldn't mivs be **more** minimal *this way* or *that way*?
+
 Probably. I think mivs is cool because it does the least amount of work to 
 actually even consider itself versioning software.
+
+> Isn't it ironic that this project is hosted on git?
+
+Probably.
