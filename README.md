@@ -1,7 +1,7 @@
 # mivs
 mivs is **mi**nimal **v**ersioning **s**oftware. 
 
-This software was written both as a way to 
+mivs is good for simple single-person/small-team projects.
 
 ## TODO
 * Download glob, difflib, whatever else pulled up on phone
@@ -12,20 +12,17 @@ This software was written both as a way to
 * `timeline` - alternate, converging, and diverging histories of the repo
 
 ## Commands
-### Basic
-`mivs init` or simply `mivs` will initialize a mivs repository.
+`mivs -i` will initialize a mivs repository.
 
-`mivs record <comment>` will record the changes of the working repo as-is. 
+`mivs -r "<comment>"` will record the changes of the working repo as-is. 
 
-`mivs destroy` will remove the current mivs repository. 
-`mivs destroy all` will remove the current files and directory of the repository too.
+`mivs -j <record_number>` will alter the mivs repository and revert files to the specific record.
+`current` will jump back to the present.
 
-`mivs timeline <timeline_name>` moves the repo into the timeline
-`<timeline_name>`. `mivs timetravel <record_number>` will 
+`mivs -s "<info>"` will search the mivs repo and print the corresponding records.
 
-`mivs merge <timeline_name1> <timeline_name2>` merges the two timelines in a simple way, 
-favoring the first timeline. If an error occurs, the user can fix the diffs in the code
-and finish by typing `mivs merge`.
+`mivs -m <timeline_name1> <timeline_name2>` merges the two mivs repos in a simple way, 
+favoring the first timeline.
 
 ### Extra
 `mivs search <timelines, record numbers, words, or tags>` will return version numbers and messages
@@ -48,22 +45,13 @@ Every mivs repo has a `.mivs` folder. Inside you'll find a structure like:
   |- record.yaml
   |- ...
 ```
-* `ignore.txt`
-  * Holds a list of file/directory names to ignore from mivs
-  * Delimited by newlines
 * `mivs.yaml`
   * A yaml file defining the following information
     * `name` of the mivs repo
-	* a list of `timelines` 
 	* a list of `ignores`
-* `server.yaml`
-  * TODO
-* `timelines`
-  * A directory of directories of different timelines
+	* The last `record_number`
 
-## Development
-* `pip install virtualenv`
-* Create venv `python3 -m venv mivs-env`
-* `source mivs-env/bin/activate`
-* `pip install -r requirements.txt`
-* `deactivate`
+## Requirements
+* `Python3`
+* Python `pyyaml` module
+* GNU/BSD `diff`
