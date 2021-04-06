@@ -45,34 +45,37 @@ Every mivs repo has a `.mivs` folder. Inside you'll find a structure like:
 $ mkdir auto_readme_test
 $ cd auto_readme_test
 $ mivs -i
-readme_test.sh: line 8: mivs: command not found
+Initializing mivs
 $ echo 'Hello world!'
 $ mivs -r 'Created README'
-readme_test.sh: line 11: mivs: command not found
+Recording current state
 $ mkdir src
 $ echo 'print('\''wow!'\'')'
 $ echo 'sq = lambda x : x**2'
 $ mivs -r 'Added other code'
-readme_test.sh: line 16: mivs: command not found
+Recording current state
 $ echo -e 'I added another sentence.\nOr two!'
 $ mivs -r 'Updated README'
-readme_test.sh: line 19: mivs: command not found
+Recording current state
 $ mivs -l
-readme_test.sh: line 21: mivs: command not found
+Initializing mivs
+main
+(0) 2021-04-06 00:23:21.710162: Created README
+(1) 2021-04-06 00:23:21.763468: Added other code
+(2) 2021-04-06 00:23:21.816855: Updated README
 $ mivs -s README
-readme_test.sh: line 23: mivs: command not found
+Searching mivs
 $ ls
 README.md  src
 $ mivs -j 0
-readme_test.sh: line 26: mivs: command not found
+Jumping to record 0
 $ ls
-README.md  src
 $ mivs -j 1
-readme_test.sh: line 29: mivs: command not found
+Jumping to record 1
 $ ls
-README.md  src
+README.md
 $ mivs -j 2
-readme_test.sh: line 32: mivs: command not found
+Jumping to record 2
 $ ls
 README.md  src
 $ cd ..
