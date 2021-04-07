@@ -43,7 +43,6 @@ Every mivs repo has a `.mivs` folder. Inside you'll find a structure like:
 ## Example
 ```
 $ mkdir auto_readme_test
-mkdir: cannot create directory ‘auto_readme_test’: File exists
 $ cd auto_readme_test
 $ mivs -i
 Initializing mivs
@@ -51,7 +50,6 @@ $ echo 'Hello world!'
 $ mivs -r 'Created README'
 Recording current state
 $ mkdir src
-mkdir: cannot create directory ‘src’: File exists
 $ echo 'print('\''wow!'\'')'
 $ echo 'sq = lambda x : x**2'
 $ mivs -r 'Added other code'
@@ -62,12 +60,9 @@ Recording current state
 $ mivs -l
 Initializing mivs
 main
-(0) 2021-04-06 00:12:34.006285: Created README
-(1) 2021-04-06 00:12:34.060347: Added other code
-(2) 2021-04-06 00:12:34.113876: Updated README
-(3) 2021-04-06 00:15:02.379771: Created README
-(4) 2021-04-06 00:15:02.433315: Added other code
-(5) 2021-04-06 00:15:02.485747: Updated README
+(0) 2021-04-06 00:23:21.710162: Created README
+(1) 2021-04-06 00:23:21.763468: Added other code
+(2) 2021-04-06 00:23:21.816855: Updated README
 $ mivs -s README
 Searching mivs
 $ ls
